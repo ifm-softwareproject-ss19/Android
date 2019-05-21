@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">AR</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="button_credits">Credits</string>
+    <string name="button_ar">Augmented Reality</string>
+    <string name="button_car">Car controls</string>
+    <string name="button_drone">Drone Controls</string>
+    <string name="button_connect">Connections</string>
+    <string name="app_title">Search and Title</string>
+    <string name="switch_car">Car Connection</string>
+    <string name="switch_drone">Drone Connection</string>
+    <string name="button_connectDetails">Connection Details</string>
+    <string name="button_mainmenu">Mainmenu</string>
+</resources>
