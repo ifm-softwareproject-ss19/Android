@@ -1,8 +1,0 @@
-<resources>
-    <string name="app_name">ImportSDKDemo</string>
-    <string name="augmented_reality">Augmented Reality</string>
-    <string name="credits">Credits</string>
-    <string name="manuelle_autosteuerung">Manuelle Autosteuerung</string>
-    <string name="drohnen_steuerung">Drohnen Steuerung</string>
-    <string name="verbindungen">Verbindungen</string>
-</resources>

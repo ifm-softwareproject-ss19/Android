@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/btn_areality"
+        android:layout_width="0dp"
+        android:layout_height="75dp"
+        android:layout_marginTop="50dp"
+        android:onClick="buttonPressed_AR"
+        android:text="@string/augmented_reality"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_autosteuerung" />
+
+    <Button
+        android:id="@+id/btn_credits"
+        android:layout_width="0dp"
+        android:layout_height="75dp"
+        android:layout_marginTop="75dp"
+        android:onClick="buttonPressed_Credits"
+        android:text="@string/credits"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_areality" />
+
+    <Button
+        android:id="@+id/btn_autosteuerung"
+        android:layout_width="0dp"
+        android:layout_height="75dp"
+        android:layout_marginTop="50dp"
+        android:onClick="buttonPressed_Auto"
+        android:text="@string/manuelle_autosteuerung"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_drohnensteuerung" />
+
+    <Button
+        android:id="@+id/btn_drohnensteuerung"
+        android:layout_width="0dp"
+        android:layout_height="75dp"
+        android:layout_marginTop="50dp"
+        android:onClick="buttonPressed_Drohne"
+        android:text="@string/drohnen_steuerung"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_connections" />
+
+    <Button
+        android:id="@+id/btn_connections"
+        android:layout_width="0dp"
+        android:layout_height="75dp"
+        android:layout_marginTop="4dp"
+        android:onClick="buttonPressed_Verbindungen"
+        android:text="@string/verbindungen"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</android.support.constraint.ConstraintLayout>
