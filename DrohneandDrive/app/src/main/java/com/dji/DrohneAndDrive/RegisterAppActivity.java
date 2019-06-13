@@ -69,6 +69,11 @@ public class RegisterAppActivity extends Service {
 
 
     }
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_NOT_STICKY;
+    }
+
     public void initRegistration(){
         // When the compile and target version is higher than 22, please request the following permission at runtime to ensure the SDK works well.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

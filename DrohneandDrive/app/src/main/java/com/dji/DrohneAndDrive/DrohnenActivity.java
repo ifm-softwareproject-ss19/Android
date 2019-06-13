@@ -1,6 +1,8 @@
 package com.dji.DrohneAndDrive;
 
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -18,6 +20,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import dji.common.error.DJIError;
+import dji.common.flightcontroller.FlightControllerState;
 import dji.common.flightcontroller.simulator.InitializationData;
 import dji.common.flightcontroller.virtualstick.FlightControlData;
 import dji.common.flightcontroller.virtualstick.FlightCoordinateSystem;
@@ -33,10 +36,10 @@ import dji.sdk.sdkmanager.DJISDKManager;
 
 public class DrohnenActivity extends AppCompatActivity {
 
-    private final float verticalJoyControlMaxSpeed = 0.2f; //max 0.2 meter die sekunde
-    private final float yawJoyControlMaxSpeed = 15; // Geschwindigkeit in Grad
-    private final float pitchJoyControlMaxSpeed = 0.2f;
-    private final float rollJoyControlMaxSpeed = 0.2f;
+    private final float verticalJoyControlMaxSpeed = 0.4f; //max 0.2 meter die sekunde
+    private final float yawJoyControlMaxSpeed = 45; // Geschwindigkeit in Grad
+    private final float pitchJoyControlMaxSpeed = 0.4f;
+    private final float rollJoyControlMaxSpeed = 0.4f;
 
     private float mPitch;
     private float mRoll;
@@ -53,6 +56,7 @@ public class DrohnenActivity extends AppCompatActivity {
     private Timer mSendCarDataTimer; //Car
     private SendVirtualStickDataTask mSendVirtualStickDataTask;
     private SendCarDataTask mSendCarData;
+    private TextView gpsTextView;
 
     private double longitude,latitude,atitude;
     private FlightController mFlightController;
@@ -79,18 +83,32 @@ public class DrohnenActivity extends AppCompatActivity {
         Intent intent = new Intent(this, RegisterAppActivity.class);
         startService(intent);
         }
-       // IntentFilter filter = new IntentFilter();
-       // filter.addAction(DJIDemoApplication.FLAG_CONNECTION_CHANGE);
-        //registerReceiver(mReceiver, filter);
+        //Register BroadcastReceiver
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(RegisterAppActivity.FLAG_CONNECTION_CHANGE);
+        registerReceiver(mReceiver, filter);
         setContentView(R.layout.activity_drohnen);
         initUI();
+    }
+    protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onProductConnectionChange();
+        }
+    };
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        unregisterReceiver(mReceiver);
     }
 
 
     class SendVirtualStickDataTask extends TimerTask {
         @Override
         public void run() {
-
+            Log.d("Datatask","controllerstatuss="+ mFlightController);
             if (mFlightController != null) {
                 mFlightController.sendVirtualStickFlightControlData(
                         new FlightControlData(
@@ -113,11 +131,15 @@ public class DrohnenActivity extends AppCompatActivity {
             //Sende Daten ans Auto
         }
     }
+    private void onProductConnectionChange()
+    {
+        initFlightController();
+    }
 
 
     private void initFlightController() {
 
-        Aircraft aircraft = DrohnenActivity.getAircraftInstance();
+        Aircraft aircraft = getAircraftInstance();
         if (aircraft == null || !aircraft.isConnected()) {
            // showToast("Disconnected");
             mFlightController = null;
@@ -129,31 +151,50 @@ public class DrohnenActivity extends AppCompatActivity {
             mFlightController.setYawControlMode(YawControlMode.ANGULAR_VELOCITY);
             mFlightController.setVerticalControlMode(VerticalControlMode.VELOCITY);
             mFlightController.setRollPitchCoordinateSystem(FlightCoordinateSystem.BODY);
-            /*
-            mFlightController.getSimulator().setStateCallback(new SimulatorState.Callback() {
+            mFlightController.setVirtualStickModeEnabled(true, new CommonCallbacks.CompletionCallback() {
                 @Override
-                public void onUpdate(final SimulatorState stateData) {
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
+                public void onResult(DJIError djiError) {
+                    if (djiError != null){
 
-                            String yaw = String.format("%.2f", stateData.getYaw());
-                            String pitch = String.format("%.2f", stateData.getPitch());
-                            String roll = String.format("%.2f", stateData.getRoll());
-                            String positionX = String.format("%.2f", stateData.getPositionX());
-                            String positionY = String.format("%.2f", stateData.getPositionY());
-                            String positionZ = String.format("%.2f", stateData.getPositionZ());
+                    }else
+                    {
 
-                            mTextView.setText("Yaw : " + yaw + ", Pitch : " + pitch + ", Roll : " + roll + "\n" + ", PosX : " + positionX +
-                                    ", PosY : " + positionY +
-                                    ", PosZ : " + positionZ);
-                        }
-                    });
-
+                    }
                 }
-            }); */
+            });
+
+        }
+        if (mFlightController != null) {
+            mFlightController.setStateCallback(new FlightControllerState.Callback() {
+
+                @Override
+                public void onUpdate(FlightControllerState djiFlightControllerCurrentState) {
+                    latitude = djiFlightControllerCurrentState.getAircraftLocation().getLatitude();
+                    longitude = djiFlightControllerCurrentState.getAircraftLocation().getLongitude();
+                    atitude = djiFlightControllerCurrentState.getAircraftLocation().getAltitude();
+                    updateDroneLocation();
+                }
+            });
         }
     }
+
+    private void updateDroneLocation() {
+
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String lon = String.format("%.2f", latitude);
+                String lat = String.format("%.2f", longitude);
+                String att = String.format("%.2f", atitude);
+                gpsTextView.setText("GPS(Drohne): Lat: "+ lat + " Long: " + lon + " Att: "+ att);
+            }
+        });
+
+
+
+    }
+
     public static boolean isAircraftConnected() {
         return getProductInstance() != null && getProductInstance() instanceof Aircraft;
     }
@@ -172,6 +213,9 @@ public class DrohnenActivity extends AppCompatActivity {
         mScreenJoystickRight = (OnScreenJoystick)findViewById(R.id.directionJoystickRight);
         mScreenJoystickLeft = (OnScreenJoystick)findViewById(R.id.directionJoystickLeft);
         switchJoystick =(SwitchCompat)findViewById(R.id.DrohneOrCarJoystickSwitch);
+        gpsTextView = (TextView)findViewById(R.id.gps_text_view);
+        stickJoystickToDrone();
+
         switchJoystick.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -184,7 +228,6 @@ public class DrohnenActivity extends AppCompatActivity {
                 }
             }
         });
-        stickJoystickToDrone();
     }
 
     private void stickJoystickToDrone(){

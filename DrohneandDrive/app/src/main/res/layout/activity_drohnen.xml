@@ -74,6 +74,42 @@
         android:background="@color/dark_gray"
         android:orientation="horizontal">
 
+        <dji.ux.widget.AutoExposureLockWidget
+            android:layout_width="30dp"
+            android:layout_height="30dp"/>
+
+        <dji.ux.widget.FocusExposureSwitchWidget
+            android:layout_width="30dp"
+            android:layout_height="30dp"/>
+
+        <dji.ux.widget.FocusModeWidget
+            android:layout_width="30dp"
+            android:layout_height="30dp"/>
+
+        <dji.ux.widget.config.CameraConfigISOAndEIWidget
+            android:layout_width="60dp"
+            android:layout_height="30dp"/>
+
+        <dji.ux.widget.config.CameraConfigShutterWidget
+            android:layout_width="60dp"
+            android:layout_height="30dp"/>
+
+        <dji.ux.widget.config.CameraConfigApertureWidget
+            android:layout_width="60dp"
+            android:layout_height="30dp"/>
+
+        <dji.ux.widget.config.CameraConfigEVWidget
+            android:layout_width="60dp"
+            android:layout_height="30dp"/>
+
+        <dji.ux.widget.config.CameraConfigWBWidget
+            android:layout_width="70dp"
+            android:layout_height="30dp"/>
+
+        <dji.ux.widget.config.CameraConfigStorageWidget
+            android:layout_width="130dp"
+            android:layout_height="30dp"/>
+
 
     </LinearLayout>
 
@@ -199,5 +235,14 @@
         android:layout_centerHorizontal="true"
         android:scaleX="2"
         android:text="Drohne"/>
+
+    <TextView
+        android:id="@+id/gps_text_view"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="45dp"
+        android:layout_centerHorizontal="true"
+        android:text="GPS Position Drohne" />
 
 </RelativeLayout>
