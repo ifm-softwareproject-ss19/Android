@@ -7,7 +7,7 @@ import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final String TITLE = "Drohne And Drive";
+    private final String TITLE = "Drone And Drive";
 
 
     @Override
@@ -15,11 +15,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.setTitle(TITLE);
-    }
-
-    public void buttonPressed_Verbindungen(View view) {
-        Intent intent = new Intent(this, VerbindungenActivity.class);
-        startActivity(intent);
     }
     public void buttonPressed_Drohne(View view) {
         Intent intent = new Intent(this, DrohnenActivity.class);
@@ -29,14 +24,4 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, AutoSteuerungActivity.class);
         startActivity(intent);
     }
-    public void buttonPressed_AR(View view) {
-        Intent intent = new Intent(this, ARealityActivity.class);
-        startActivity(intent);
-    }
-    public void buttonPressed_Credits(View view) {
-        Intent intent = new Intent(this, CreditsActivity.class);
-        startActivity(intent);
-    }
-
-
 }

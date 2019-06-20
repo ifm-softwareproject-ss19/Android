@@ -1,6 +1,5 @@
 package com.dji.DrohneAndDrive;
 
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,25 +8,17 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.ToggleButton;
-
 import java.util.Timer;
 import java.util.TimerTask;
-
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.FlightControllerState;
-import dji.common.flightcontroller.simulator.InitializationData;
 import dji.common.flightcontroller.virtualstick.FlightControlData;
 import dji.common.flightcontroller.virtualstick.FlightCoordinateSystem;
 import dji.common.flightcontroller.virtualstick.RollPitchControlMode;
 import dji.common.flightcontroller.virtualstick.VerticalControlMode;
 import dji.common.flightcontroller.virtualstick.YawControlMode;
-import dji.common.model.LocationCoordinate2D;
 import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.flightcontroller.FlightController;
@@ -36,15 +27,34 @@ import dji.sdk.sdkmanager.DJISDKManager;
 
 public class DrohnenActivity extends AppCompatActivity {
 
+
+    //Event Name für den BroadVCst Reciever
+    final String eventUP="UP";
+    final String eventDown="DOWN";
+    final String eventRight= "RIGHT";
+    final String eventLeft= "LEFT";
+    final String eventNotihng= "NOTHING";
+    private String autoSteuerungscommand=""; //referenzvariable
+    private Intent eventIntent;
+
     private final float verticalJoyControlMaxSpeed = 0.4f; //max 0.2 meter die sekunde
     private final float yawJoyControlMaxSpeed = 45; // Geschwindigkeit in Grad
     private final float pitchJoyControlMaxSpeed = 0.4f;
     private final float rollJoyControlMaxSpeed = 0.4f;
-
+    //Drohnenvaruiablen
     private float mPitch;
     private float mRoll;
     private float mYaw;
     private float mThrottle;
+    //Auto variablen
+    private float vUp;
+    private float vDown;
+    private float vLeft;
+    private float vRight;
+    private final float UpMaxSpeed = 0.5f; //
+    private final float DownMaxSpeed = 0.5f; //
+    private final float LeftMaxSpeed =  0.5f; //
+    private final float RightMaxSpeed =  0.5f; //
 
     private static BaseProduct mProduct;
 
@@ -78,6 +88,7 @@ public class DrohnenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         MApplication map =(MApplication)getApplicationContext();
+
 
         if(!map.isRegisterAp()){
         Intent intent = new Intent(this, RegisterAppActivity.class);
@@ -127,8 +138,10 @@ public class DrohnenActivity extends AppCompatActivity {
     class SendCarDataTask extends TimerTask {
         @Override
         public void run() {
-
-            //Sende Daten ans Auto
+            if(eventIntent!=null){
+                sendBroadcast(eventIntent);
+                Log.d("Cardatatask",eventIntent.getAction());
+            }else  Log.d("Cardatatask","null");
         }
     }
     private void onProductConnectionChange()
@@ -234,11 +247,11 @@ public class DrohnenActivity extends AppCompatActivity {
         mScreenJoystickRight.setJoystickListener(new OnScreenJoystickListener(){
             @Override
             public void onTouch(OnScreenJoystick joystick, float pX, float pY) {
-                if(Math.abs(pX) < 0.2 ){
+                if(Math.abs(pX) < 0.5 ){
                     pX = 0;
                 }
 
-                if(Math.abs(pY) < 0.2 ){
+                if(Math.abs(pY) < 0.5 ){
                     pY = 0;
                 }
 
@@ -258,11 +271,11 @@ public class DrohnenActivity extends AppCompatActivity {
         mScreenJoystickLeft.setJoystickListener(new OnScreenJoystickListener() {
             @Override
             public void onTouch(OnScreenJoystick joystick, float pX, float pY) {
-                if(Math.abs(pX) < 0.2 ){
+                if(Math.abs(pX) < 0.5 ){
                     pX = 0;
                 }
 
-                if(Math.abs(pY) < 0.2 ){
+                if(Math.abs(pY) < 0.5 ){
                     pY = 0;
                 }
 
@@ -283,13 +296,23 @@ public class DrohnenActivity extends AppCompatActivity {
         mScreenJoystickRight.setJoystickListener(new OnScreenJoystickListener(){
             @Override
             public void onTouch(OnScreenJoystick joystick, float pX, float pY) {
+
                 if(Math.abs(pX) < 0.5 ){
                     pX = 0;
                 }
 
-                if(Math.abs(pY) < 1.1 ){
+                if(Math.abs(pY) < 1.1 ) {
                     pY = 0;
                 }
+                if(pX<0){
+                    eventIntent = new Intent(eventLeft);
+
+                }else if (pX>0){
+                    eventIntent = new Intent(eventRight);
+                }else{
+                    eventIntent = new Intent(eventNotihng);
+                }
+                eventIntent.putExtra("Speed",0.5f);
 
                 Log.d("Right","Car   px: "+ pX + "  py: " +pY);
 
@@ -310,6 +333,14 @@ public class DrohnenActivity extends AppCompatActivity {
 
                 if(Math.abs(pY) < 0.5 ){
                     pY = 0;
+                }
+                if(pY<0){
+                    eventIntent = new Intent(eventDown);
+
+                }else if (pY>0){
+                    eventIntent = new Intent(eventUP);
+                }else{
+                    eventIntent = new Intent(eventNotihng);
                 }
 
                 Log.d("Left","Car   px: "+ pX + "  py: " +pY);

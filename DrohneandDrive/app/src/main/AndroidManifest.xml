@@ -56,6 +56,11 @@
         </service>
         <!-- DJI SDK -->
 
+        <service android:name=".CarBackroundService" >
+        </service>
+        <service android:name=".BluetoothServices" >
+        </service>
+
         <activity android:name=".AutoSteuerungActivity"
             android:parentActivityName=".MainActivity"/>
         <activity android:name=".ARealityActivity"  android:parentActivityName=".MainActivity"/>
