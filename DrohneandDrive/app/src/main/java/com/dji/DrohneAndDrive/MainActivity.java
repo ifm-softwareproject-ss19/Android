@@ -24,4 +24,10 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, AutoSteuerungActivity.class);
         startActivity(intent);
     }
+    public void buttonPressed_Compass(View view) {
+        Intent intent = new Intent(this, CompassActivity.class);
+        startActivity(intent);
+    }
+
+
 }
