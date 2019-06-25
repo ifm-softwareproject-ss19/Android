@@ -29,17 +29,17 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
     SystemClock clock;
     Float compassRotation;
-    LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    LocationManager lm;
 
     @SuppressLint("MissingPermission") // temp solution
-    Location userLoc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+    Location userLoc;
 
     Location carLoc = new Location("service Provider");
-    double phoneLongitude = userLoc.getLongitude();
-    double phoneLatitude = userLoc.getLatitude();
+    double phoneLongitude;
+    double phoneLatitude;
     float heading = 0;
     float bearing = 0;
-    long timer = clock.elapsedRealtime(); // maybe better solution?
+    long timer;
 
 
 
@@ -152,6 +152,17 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     Sensor magnetometer;
 
     protected void onCreate(Bundle savedInstanceState) {
+
+
+        timer = clock.elapsedRealtime(); // maybe better solution?
+        lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        @SuppressLint("MissingPermission") // temp solution
+                Location userLoc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        phoneLongitude = userLoc.getLongitude();
+        phoneLatitude = userLoc.getLatitude();
+
         super.onCreate(savedInstanceState);
         compassView = new CustomCompassView(this);
         setContentView(compassView);    // Register the sensor listeners
