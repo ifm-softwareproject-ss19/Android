@@ -65,6 +65,7 @@
             android:parentActivityName=".MainActivity"/>
         <activity android:name=".ARealityActivity"  android:parentActivityName=".MainActivity"/>
         <service android:name=".RegisterAppActivity"/>
+        <activity android:label="@string/app_name" android:name=".CompassActivity"/>
         <activity android:name=".CreditsActivity" android:parentActivityName=".MainActivity"/>
         <activity android:name=".DrohnenActivity"  android:parentActivityName=".MainActivity"/>
         <activity android:name=".VerbindungenActivity"  android:parentActivityName=".MainActivity"/>
