@@ -56,8 +56,6 @@
         </service>
         <!-- DJI SDK -->
 
-        <service android:name=".CarBackroundService" >
-        </service>
         <service android:name=".BluetoothServices" >
         </service>
 
@@ -67,7 +65,7 @@
         <service android:name=".RegisterAppActivity"/>
         <activity android:name=".CreditsActivity" android:parentActivityName=".MainActivity"/>
         <activity android:name=".DrohnenActivity"  android:parentActivityName=".MainActivity"/>
-        <activity android:name=".VerbindungenActivity"  android:parentActivityName=".MainActivity"/>
+
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation"

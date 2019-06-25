@@ -21,14 +21,16 @@ import java.io.OutputStream;
 import java.util.UUID;
 import java.util.Vector;
 
+/*
+Ein Service ,welcher im Hontergrund die Bluetooth Verbindung aufrechterhält
+und das Senden und Empfangen von Daten, realisiert.
+ */
 public class BluetoothServices extends Service {
 
+    private Intent eventIntent;
+
     //Event Name für den BroadVCst Reciever
-    final String eventUP="UP";
-    final String eventDown="DOWN";
-    final String eventRight= "RIGHT";
-    final String eventLeft= "LEFT";
-    final String eventNotihng= "NOTHING";
+    final String gps ="GPSdata";
 
     private BluetoothAdapter mBluetoothAdapter;
     public static final String B_DEVICE = "MY DEVICE";
@@ -57,27 +59,25 @@ public class BluetoothServices extends Service {
         public void onReceive(Context context, Intent intent) {
             String action=intent.getAction();
             String msg="";
-            Log.d("SteuuerungRecuever",action+"  " + intent.getFloatExtra("Speed",0.0f));
-            if (action.equals(eventUP)){
-                sendData("UP");
-            } else if(action.equals(eventDown)){
-                sendData("eventDown");
-            } else if(action.equals(eventLeft)){
-                sendData("eventLeft");
-            } else if(action.equals(eventRight)){
-                sendData("eventRight");
-            } else{
+            Log.d("action",action);
+
+            if (action.equals("car")){
+                String s ="manualDirection("+intent.getStringExtra("Steering")+","+intent.getStringExtra("Direction")+")";
+                sendData(s);
+                Log.d("sendData",s);
+
+
+            } else if(action.equals(gps)) {
+                sendData(Constants.getGpsData);
+            }else{
 
             }
         }
     };
     private void registerSteuerungReceiver() {
         IntentFilter filter = new IntentFilter();
-        filter.addAction(eventDown);
-        filter.addAction(eventUP);
-        filter.addAction(eventLeft);
-        filter.addAction(eventRight);
-        filter.addAction(eventNotihng);
+        filter.addAction(gps);
+        filter.addAction("car");
         registerReceiver(steuerungReceiver, filter);
     }
 
@@ -170,7 +170,7 @@ public class BluetoothServices extends Service {
     public void sendData(String message) {
         if (mConnectedThread != null) {
             mConnectedThread.write(message.getBytes());
-            toast("sent data");
+           // toast("sent data");
         } else {
             Toast.makeText(BluetoothServices.this, "Failed to send data", Toast.LENGTH_SHORT).show();
         }
@@ -193,24 +193,6 @@ public class BluetoothServices extends Service {
         mBluetoothAdapter.cancelDiscovery();
         return super.stopService(name);
     }
-
-/*private synchronized void connected(BluetoothSocket mmSocket){
-
-    if (mConnectThread != null){
-        mConnectThread.cancel();
-        mConnectThread = null;
-    }
-    if (mConnectedThread != null){
-        mConnectedThread.cancel();
-        mConnectedThread = null;
-    }
-
-    mConnectedThread = new ConnectedBtThread(mmSocket);
-    mConnectedThread.start();
-
-
-    setState(STATE_CONNECTED);
-}*/
 
     private class ConnectBtThread extends Thread {
         private final BluetoothSocket mSocket;
@@ -300,11 +282,26 @@ public class BluetoothServices extends Service {
             int mByte;
             try {
                 mByte = inS.read(buffer);
+                String incomingMessage = new String(buffer, 0, mByte);
+                Log.d("input", "InputStream: " + incomingMessage);
+                handleInputString(incomingMessage);
             } catch (IOException e) {
                 e.printStackTrace();
             }
             Log.d("service", "connected thread run method");
 
+        }
+        /*Je nach input sende eine Intent an die Brcastreciver
+         */
+        private void handleInputString(String input){
+
+            switch (input){
+                case "A":
+                    break;
+                case "B":break;
+
+                default:break;
+            }
         }
 
 

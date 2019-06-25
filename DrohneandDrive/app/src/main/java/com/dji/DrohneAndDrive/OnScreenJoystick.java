@@ -37,7 +37,6 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
-
 public class OnScreenJoystick extends SurfaceView implements
         SurfaceHolder.Callback, View.OnTouchListener {
 

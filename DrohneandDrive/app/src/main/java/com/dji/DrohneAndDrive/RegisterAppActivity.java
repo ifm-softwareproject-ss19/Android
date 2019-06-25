@@ -6,22 +6,16 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
 import dji.sdk.base.BaseComponent;
@@ -29,9 +23,10 @@ import dji.sdk.base.BaseProduct;
 import dji.sdk.sdkmanager.DJISDKInitEvent;
 import dji.sdk.sdkmanager.DJISDKManager;
 
+/*
+Registriert das mobile SDK von DJI und prüft ob alle benötigten Rechte freigegeben wurden,
+ */
 public class RegisterAppActivity extends Service {
-
-
 
     private static final String TAG = MainActivity.class.getName();
     public static final String FLAG_CONNECTION_CHANGE = "dji_sdk_connection_change";

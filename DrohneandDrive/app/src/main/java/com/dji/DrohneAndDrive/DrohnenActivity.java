@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
@@ -27,34 +28,19 @@ import dji.sdk.sdkmanager.DJISDKManager;
 
 public class DrohnenActivity extends AppCompatActivity {
 
-
     //Event Name für den BroadVCst Reciever
-    final String eventUP="UP";
-    final String eventDown="DOWN";
-    final String eventRight= "RIGHT";
-    final String eventLeft= "LEFT";
-    final String eventNotihng= "NOTHING";
+
+    final String gps ="GPSdata";
     private String autoSteuerungscommand=""; //referenzvariable
     private Intent eventIntent;
+    private Intent gpsIntent;
 
-    private final float verticalJoyControlMaxSpeed = 0.4f; //max 0.2 meter die sekunde
-    private final float yawJoyControlMaxSpeed = 45; // Geschwindigkeit in Grad
-    private final float pitchJoyControlMaxSpeed = 0.4f;
-    private final float rollJoyControlMaxSpeed = 0.4f;
     //Drohnenvaruiablen
     private float mPitch;
     private float mRoll;
     private float mYaw;
     private float mThrottle;
-    //Auto variablen
-    private float vUp;
-    private float vDown;
-    private float vLeft;
-    private float vRight;
-    private final float UpMaxSpeed = 0.5f; //
-    private final float DownMaxSpeed = 0.5f; //
-    private final float LeftMaxSpeed =  0.5f; //
-    private final float RightMaxSpeed =  0.5f; //
+
 
     private static BaseProduct mProduct;
 
@@ -119,7 +105,7 @@ public class DrohnenActivity extends AppCompatActivity {
     class SendVirtualStickDataTask extends TimerTask {
         @Override
         public void run() {
-            Log.d("Datatask","controllerstatuss="+ mFlightController);
+            Log.d("Datatask","controllerstatus="+ mFlightController);
             if (mFlightController != null) {
                 mFlightController.sendVirtualStickFlightControlData(
                         new FlightControlData(
@@ -133,6 +119,13 @@ public class DrohnenActivity extends AppCompatActivity {
                 );
                 //uptadeKoordinates();
             }
+            //snede gps Koordinaten ans Auto
+            gpsIntent =new Intent(gps);
+            gpsIntent.putExtra("Longitude",longitude);
+            gpsIntent.putExtra("Latitude",latitude);
+
+
+            sendBroadcast(gpsIntent);
         }
     }
     class SendCarDataTask extends TimerTask {
@@ -168,10 +161,8 @@ public class DrohnenActivity extends AppCompatActivity {
                 @Override
                 public void onResult(DJIError djiError) {
                     if (djiError != null){
-
                     }else
                     {
-
                     }
                 }
             });
@@ -192,8 +183,6 @@ public class DrohnenActivity extends AppCompatActivity {
     }
 
     private void updateDroneLocation() {
-
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -201,11 +190,9 @@ public class DrohnenActivity extends AppCompatActivity {
                 String lat = String.format("%.2f", longitude);
                 String att = String.format("%.2f", atitude);
                 gpsTextView.setText("GPS(Drohne): Lat: "+ lat + " Long: " + lon + " Att: "+ att);
+
             }
         });
-
-
-
     }
 
     public static boolean isAircraftConnected() {
@@ -227,6 +214,7 @@ public class DrohnenActivity extends AppCompatActivity {
         mScreenJoystickLeft = (OnScreenJoystick)findViewById(R.id.directionJoystickLeft);
         switchJoystick =(SwitchCompat)findViewById(R.id.DrohneOrCarJoystickSwitch);
         gpsTextView = (TextView)findViewById(R.id.gps_text_view);
+        gpsTextView.setTextColor(Color.WHITE);
         stickJoystickToDrone();
 
         switchJoystick.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -235,6 +223,10 @@ public class DrohnenActivity extends AppCompatActivity {
                 if(b){
                     switchJoystick.setText("Car");
                     stickJoystickToCar();
+                    eventIntent=new Intent("car");
+                    eventIntent.putExtra("Direction",Constants.SteerFORWARD);
+                    eventIntent.putExtra("Steering",Constants.DriveSTOP);
+
                 }else{
                     switchJoystick.setText("Drohne");
                     stickJoystickToDrone();
@@ -242,7 +234,9 @@ public class DrohnenActivity extends AppCompatActivity {
             }
         });
     }
-
+/*
+Hier wird der joystick speziel für die Drohne konfiguriert
+ */
     private void stickJoystickToDrone(){
         mScreenJoystickRight.setJoystickListener(new OnScreenJoystickListener(){
             @Override
@@ -256,9 +250,9 @@ public class DrohnenActivity extends AppCompatActivity {
                 }
 
                 Log.d("Right","Drohne px: "+ pX + "  py: " +pY);
-                mPitch = (float)(pitchJoyControlMaxSpeed * pX);
+                mPitch = (float)(Constants.pitchJoyControlMaxSpeed * pX);
 
-                mRoll = (float)(rollJoyControlMaxSpeed * pY);
+                mRoll = (float)(Constants.rollJoyControlMaxSpeed * pY);
 
                 if (null == mSendVirtualStickDataTimer) {
                     mSendVirtualStickDataTask = new SendVirtualStickDataTask();
@@ -280,8 +274,8 @@ public class DrohnenActivity extends AppCompatActivity {
                 }
 
                 Log.d("Left","Drohne   px: "+ pX + "  py: " +pY);
-                mYaw = (float)(yawJoyControlMaxSpeed * pX);
-                mThrottle = (float)(verticalJoyControlMaxSpeed * pY);
+                mYaw = (float)(Constants.yawJoyControlMaxSpeed * pX);
+                mThrottle = (float)(Constants.verticalJoyControlMaxSpeed * pY);
 
                 if (null == mSendVirtualStickDataTimer) {
                     mSendVirtualStickDataTask = new SendVirtualStickDataTask();
@@ -292,11 +286,14 @@ public class DrohnenActivity extends AppCompatActivity {
             }
         });
     }
+    /*
+    Hier wird der Joystick speziel für das Auto konfiguriert
+     */
     private void stickJoystickToCar(){
         mScreenJoystickRight.setJoystickListener(new OnScreenJoystickListener(){
             @Override
             public void onTouch(OnScreenJoystick joystick, float pX, float pY) {
-
+            String direction="";
                 if(Math.abs(pX) < 0.5 ){
                     pX = 0;
                 }
@@ -305,14 +302,17 @@ public class DrohnenActivity extends AppCompatActivity {
                     pY = 0;
                 }
                 if(pX<0){
-                    eventIntent = new Intent(eventLeft);
+                    direction=Constants.SteerLeft;
 
                 }else if (pX>0){
-                    eventIntent = new Intent(eventRight);
+
+                    direction=Constants.SteerRight;
                 }else{
-                    eventIntent = new Intent(eventNotihng);
+
+                    direction=Constants.SteerFORWARD;
                 }
                 eventIntent.putExtra("Speed",0.5f);
+                eventIntent.putExtra("Direction",direction);
 
                 Log.d("Right","Car   px: "+ pX + "  py: " +pY);
 
@@ -335,12 +335,13 @@ public class DrohnenActivity extends AppCompatActivity {
                     pY = 0;
                 }
                 if(pY<0){
-                    eventIntent = new Intent(eventDown);
+                    eventIntent.putExtra("Steering",Constants.DriveBACK);
 
                 }else if (pY>0){
-                    eventIntent = new Intent(eventUP);
+                    eventIntent.putExtra("Steering",Constants.DriveFRONT);
                 }else{
-                    eventIntent = new Intent(eventNotihng);
+
+                    eventIntent.putExtra("Steering",Constants.DriveSTOP);
                 }
 
                 Log.d("Left","Car   px: "+ pX + "  py: " +pY);
