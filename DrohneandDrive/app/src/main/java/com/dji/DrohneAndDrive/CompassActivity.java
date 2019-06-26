@@ -29,10 +29,10 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
     SystemClock clock;
     Float compassRotation;
+    Float compassOrientation;
     LocationManager lm;
 
-    @SuppressLint("MissingPermission") // temp solution
-    Location userLoc;
+    Location userLoc = new Location("service Provider");;
 
     Location carLoc = new Location("service Provider");
     double phoneLongitude;
@@ -42,10 +42,9 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     long timer;
 
 
-
     public void setLocs(float lati, float longi) {
 
-
+        /*
         final LocationListener locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
                 phoneLongitude = location.getLongitude();
@@ -70,22 +69,21 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+            this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 125);
             return;
         }
         lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, locationListener);
-
-
-        bearing=userLoc.bearingTo(carLoc);
+*/
 
         carLoc.setLongitude(longi);
         carLoc.setLatitude(lati);
+        Location phoneLoc = new Location("service Provider");
+
+        phoneLoc.setLongitude(phoneLongitude);
+        phoneLoc.setLatitude(phoneLatitude);
+        bearing = phoneLoc.bearingTo(carLoc);
+
+
 
     }
 
@@ -102,45 +100,53 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
         protected void onDraw(Canvas canvas) {
 
-            if(timer+1 > clock.elapsedRealtime()){
+            if (timer + 1 < clock.elapsedRealtime()) {
                 float newLati = 10; // here carGPS necessary
                 float newLongi = 20;
                 setLocs(newLati, newLongi);
-            }
 
+
+                GeomagneticField geoField = new GeomagneticField(Double.valueOf(userLoc.getLatitude()).floatValue(), Double
+                        .valueOf(userLoc.getLongitude()).floatValue(),
+                        Double.valueOf(userLoc.getAltitude()).floatValue(),
+                        System.currentTimeMillis());
+                heading = geoField.getDeclination();
+                System.out.println(heading);
+            }
+            timer = clock.elapsedRealtime();
             int width = getWidth();
             int height = getHeight();
             int centerWidth = width / 2;
             int centerHeight = height / 2;
 
-            GeomagneticField geoField = new GeomagneticField( Double.valueOf( userLoc.getLatitude() ).floatValue(), Double
-                    .valueOf( userLoc.getLongitude() ).floatValue(),
-                    Double.valueOf( userLoc.getAltitude() ).floatValue(),
-                    System.currentTimeMillis() );
-            heading -= geoField.getDeclination();
+
 
             if (bearing < 0) {
                 bearing = bearing + 360;
             }
 
-            compassRotation = bearing -  heading;
-            if(compassRotation != null) {
+
+
+            if (compassRotation != null) {
                 if (compassRotation < 0) {
                     compassRotation = compassRotation + 360;
                 }
-                canvas.rotate(-compassRotation * 360 / (2 * (float) Math.PI), centerWidth, centerHeight);
+                float rotation = compassRotation+compassOrientation;
+
+                canvas.rotate(rotation, centerWidth, centerHeight);
+                System.out.println(compassRotation);
             }
             compassPaint.setColor(Color.RED);
             compassPaint.setStyle(Paint.Style.STROKE);
             compassPaint.setStrokeWidth(2);
             Path arrow = new Path();
-            arrow.moveTo(centerWidth, centerHeight-20);
-            arrow.lineTo(centerWidth+30,centerHeight-50);
-            arrow.lineTo(centerWidth-30,centerHeight-50);
+            arrow.moveTo(centerWidth, centerHeight + 10);
+            arrow.lineTo(centerWidth + 30, centerHeight - 30);
+            arrow.lineTo(centerWidth - 30, centerHeight - 30);
             arrow.close();
-            canvas.drawPath(arrow,compassPaint);
+            canvas.drawPath(arrow, compassPaint);
             // canvas.drawLine(1000, centerHeight,1000, centerHeight ,compassPaint);
-            canvas.drawText("Car",centerWidth, centerHeight+10, compassPaint);
+            canvas.drawText("Car", centerWidth, centerHeight - 40, compassPaint);
         }
 
 
@@ -153,15 +159,51 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
     protected void onCreate(Bundle savedInstanceState) {
 
+        final LocationListener locationListener = new LocationListener() {
+            public void onLocationChanged(Location location) {
+                if(location != null) {
+
+                    compassRotation = bearing - heading;
+                    phoneLongitude = location.getLongitude();
+                    phoneLatitude = location.getLatitude();
+                }
+            }
+
+            @Override
+            public void onStatusChanged(String s, int i, Bundle bundle) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String s) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String s) {
+
+            }
+        };
+
 
         timer = clock.elapsedRealtime(); // maybe better solution?
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 125);
+            return;
+        }
+        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
-        @SuppressLint("MissingPermission") // temp solution
-                Location userLoc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 125);
+            return;
+        }
+        //userLoc = lm.;
+        if(userLoc != null){
+            phoneLongitude = userLoc.getLongitude();
+            phoneLatitude = userLoc.getLatitude();
+        }
 
-        phoneLongitude = userLoc.getLongitude();
-        phoneLatitude = userLoc.getLatitude();
 
         super.onCreate(savedInstanceState);
         compassView = new CustomCompassView(this);
@@ -199,7 +241,8 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
             if (success) {
                 float orientation[] = new float[3];
                 SensorManager.getOrientation(R, orientation);
-                compassRotation = orientation[0];
+                compassOrientation = orientation[0];
+
             }
             compassView.invalidate();
         }
