@@ -22,15 +22,25 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.regex.MatchResult;
+
+import static com.dji.DrohneAndDrive.BluetoothServices.findMatches;
 
 
 public class AutoSteuerungActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     BluetoothServices mService;
     boolean mBound = false;
-    final String gps ="GPSdata";
+    final String gpsDrone ="GPSdata";
+    final String gpsCar ="GPSdataCar";
+    final String requestGpsCar="requestGPSCar";
+    String cargpsinfo="";
     String latDrohne=""; String longiDrohne="";
+    String latCar=""; String longiCar="";
+    private double dlatDrohne=40; private double dlongDrohne=23;
+    private final String genauigkeit ="%.6f";//Nachkommastelle
 
     private static final String TAG = "AutosteuerungActivity";
 
@@ -96,13 +106,12 @@ public class AutoSteuerungActivity extends AppCompatActivity implements AdapterV
         //Broadcasts wenn die Textview aktualisiert werden muss
         IntentFilter filterTxtView = new IntentFilter();
         filterTxtView.addAction(Constants.txtInfoActionfilter);
-        filterTxtView.addAction(gps);
+        filterTxtView.addAction(gpsDrone);
+        filterTxtView.addAction(gpsCar);
+        filterTxtView.addAction(requestGpsCar);
         registerReceiver(BroadcastReceiverTextViewInfo, filterTxtView);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-
-
 
         btnONOFF.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,8 +150,12 @@ public class AutoSteuerungActivity extends AppCompatActivity implements AdapterV
             @Override
             public void onClick(View view) {
                 if(!carStateDriveModus.equals(Constants.carstateAutomatic)&&carStateConnection.equals(Constants.carIsConnected)){
-                    mService.sendData("toDo");
-                    carStateDriveModus=Constants.carstateAutomatic;
+
+                    //mService.sendData("automaticDrive("+dlatDrohne+","+dlongDrohne+")");
+
+                    mService.sendData("getGpsData()");
+                    //carStateDriveModus=Constants.carstateAutomatic;
+
                     setTextViewInfo();
                 }
 
@@ -157,8 +170,10 @@ public class AutoSteuerungActivity extends AppCompatActivity implements AdapterV
         String bluetooth="Bluetooth: "+bluetoothState+n;
         String connection ="Connection: "+carStateConnection+n;
         String driveModus ="Drive-Modus:"+ carStateDriveModus+n;
-        String drohne = "Drohne GPS: Long: " + longiDrohne+ "  Lati: "+latDrohne+n;
-        value = header+bluetooth+connection+driveModus+drohne;
+        String drohne = "Drohne GPS: Lati: " + latDrohne+ "  Longi: "+longiDrohne+n;
+        String car = "Car GPS: Lati: " + latCar+ "  Longi: "+longiCar+n;
+
+        value = header+bluetooth+connection+driveModus+drohne+ car;
         textViewInfo.setText(value);
         SharedPreferences prefs = getSharedPreferences("data", MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
@@ -364,12 +379,22 @@ public class AutoSteuerungActivity extends AppCompatActivity implements AdapterV
             if (action.equals(Constants.txtInfoActionfilter)){
                 setTextViewInfo();
 
-            }else if(action.equals(gps)) {
-                double lo =intent.getDoubleExtra("Longitude",6.6);
-                double la = intent.getDoubleExtra("Latitude",0.0);
-                longiDrohne = String.format("%.4f", lo);
-                latDrohne  = String.format("%.4f", la);
+            }else if(action.equals(gpsDrone)) {
+                dlongDrohne =intent.getDoubleExtra("Longitude",6.6);
+                dlatDrohne = intent.getDoubleExtra("Latitude",0.0);
+                longiDrohne = String.format(genauigkeit, dlongDrohne);
+                latDrohne  = String.format(genauigkeit, dlatDrohne);
                 setTextViewInfo();
+            }else if(action.equals(gpsCar)) {
+                cargpsinfo =intent.getStringExtra("gps");
+                double lo = intent.getDoubleExtra("Longitude", 6.6);
+                double la = intent.getDoubleExtra("Latitude", 0.0);
+                longiCar = String.format(genauigkeit, lo);
+                latCar = String.format(genauigkeit, la);
+                setTextViewInfo();
+
+            }else if(action.equals(requestGpsCar)) {
+                mService.sendData("getGpsData()");
             }
         }
     };
