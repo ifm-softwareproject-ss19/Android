@@ -64,7 +64,7 @@
         <service android:name=".RegisterAppActivity"/>
         <activity android:name=".CreditsActivity" android:parentActivityName=".MainActivity"/>
         <activity android:name=".DrohnenActivity"  android:parentActivityName=".MainActivity"/>
-
+        <activity android:name=".CompassActivity"  android:parentActivityName=".MainActivity"/>
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation"

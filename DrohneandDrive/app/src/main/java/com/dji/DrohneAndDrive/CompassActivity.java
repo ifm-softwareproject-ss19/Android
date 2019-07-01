@@ -241,8 +241,8 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
                 compassPaint.setColor(Color.RED);
                 compassPaint.setStrokeWidth(2);
-                compassPaint.setTextSize(30);
-                canvas.drawText("No Signal", centerWidth, centerHeight ,compassPaint);
+                compassPaint.setTextSize(110);
+                canvas.drawText("No Signal", centerWidth-75, centerHeight ,compassPaint);
             }
 
         }
