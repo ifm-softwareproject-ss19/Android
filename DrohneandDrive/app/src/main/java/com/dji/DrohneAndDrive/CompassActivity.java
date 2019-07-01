@@ -1,9 +1,6 @@
 package com.dji.DrohneAndDrive;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.ActionBar;
-import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -27,21 +24,21 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 
-import static android.content.Context.SENSOR_SERVICE;
 
 public class CompassActivity extends AppCompatActivity implements SensorEventListener {
 
-    SystemClock clock;
     Float compassRotation;
     double compassOrientation;
     LocationManager lm;
 
-    boolean firstrun = true;
+    boolean firstRun = true;
     boolean signalError = false;
 
-    Location userLoc = new Location("service Provider");;
+    final String requestGpsCar = "requestGPSCar";
+    final String gpsCar= "GPSCar";
+
+    Location userLoc = new Location("service Provider");
 
     Location carLoc = new Location("service Provider");
     double phoneLongitude;
@@ -60,7 +57,8 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     private SensorManager mSensorManager;
     Sensor accelerometer;
     Sensor magnetometer;
-
+/*
+     a method to test GPSDAta
     public void testgpsData(){
         Intent test = new Intent();
         test.setAction("compassGpsData");
@@ -68,16 +66,15 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         test.putExtra("compassLongitude",11.f);
         sendBroadcast(test);
     }
-
+*/
     protected BroadcastReceiver compassReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            String msg = "";
             Log.d("action", action);
 
-            if (action.equals("compassGpsData")) {
+            if (action.equals(gpsCar)) {
 
 
                 newLati = intent.getFloatExtra("compassLatitude",92);
@@ -92,7 +89,7 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
     private void registerCompassReceiver() {
         IntentFilter filter = new IntentFilter();
-        filter.addAction("compassGpsData");
+        filter.addAction(gpsCar);
         registerReceiver(compassReceiver, filter);
     }
 
@@ -161,13 +158,13 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
         protected void onDraw(Canvas canvas) {
 
-            timer = clock.elapsedRealtime();
+            timer = SystemClock.elapsedRealtime();
 
         //GPSTEST    System.out.println("Latitude"+newLati);
 
-            if (timer + 0.5 < clock.elapsedRealtime()|| firstrun) {
+            if (timer + 0.5 < SystemClock.elapsedRealtime()|| firstRun) {
                 Intent compassGps = new Intent();
-                compassGps.setAction("compassGps");
+                compassGps.setAction(requestGpsCar);
                 sendBroadcast(compassGps);
 
                 if(newLati < 92|| newLongi < 182){
@@ -176,10 +173,10 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
 
 
-                } else if(firstrun){
+                } else if(firstRun){
                     signalError = true;
                 }
-                firstrun = false;
+                firstRun = false;
                 setLocs(updateLati, updateLongi);
                 System.out.println(signalError);
            }
@@ -259,8 +256,8 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
         super.onCreate(savedInstanceState);
         registerCompassReceiver();
-        testgpsData(); // GPSTEST
-        timer = clock.elapsedRealtime(); // maybe better solution?
+        //testgpsData(); // GPSTEST
+        timer = SystemClock.elapsedRealtime();
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 125);
@@ -311,11 +308,11 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
             mGeomagnetic = event.values;
         if (mGravity != null && mGeomagnetic != null) {
-            float R[] = new float[9];
-            float I[] = new float[9];
+            float[] R= new float[9];
+            float[] I = new float[9];
             boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
             if (success) {
-                float orientation[] = new float[3];
+                float[] orientation = new float[3];
                 SensorManager.getOrientation(R, orientation);
                // System.out.println("orientationSensor:"+orientation[0]);
                 compassOrientation = Math.toDegrees(orientation[0]);
