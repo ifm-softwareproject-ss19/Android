@@ -24,5 +24,15 @@ public class Constants {
     public static final float pitchJoyControlMaxSpeed = 0.4f;
     public static final float rollJoyControlMaxSpeed = 0.4f;
 
+    public static final String carstateAutomatic ="Automatic Drive";
+    public static final String carstateManual ="Manual Drive";
+    public static final String carstateNone ="None";
+    public static final String carIsConnected ="Car is connected";
+    public static final String carIsNotConnected ="Car is not connected ";
+    public static final String carstateDriving ="Car is driving";
+    public static final String carstateArrived ="arrived at destination";
+
+    public static final String txtInfoActionfilter ="refreshInfo";
+
 }
 

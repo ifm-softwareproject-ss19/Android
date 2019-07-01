@@ -1,61 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools"
-android:id="@+id/activity_main"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-tools:context=".AutoSteuerungActivity">
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AutoSteuerungActivity">
 
-<Button
-    android:text="ON/OFF"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_alignParentTop="true"
-    android:layout_alignParentRight="true"
-    android:id="@+id/btnONOFF"/>
-
-<Button
-    android:text="Enable Discoverable"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:id="@+id/btnDiscoverable_on_off"
-    android:onClick="btnEnableDisable_Discoverable"
-    android:layout_alignParentTop="true"
-    android:layout_centerHorizontal="true"/>
-
-<Button
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:id="@+id/btnFindUnpairedDevices"
-    android:text="Discover"
-    android:onClick="btnDiscover"/>
-
-    <ListView
-        android:id="@+id/lvNewDevices"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_below="@+id/btnStartConnection"
-        android:layout_marginTop="40dp" />
+    <Button
+        android:id="@+id/btnONOFF"
+        android:layout_width="344dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="244dp"
+        android:text="Bluetooth ON/OFF"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnStartConnection"
-        android:layout_width="wrap_content"
+        android:layout_width="344dp"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/btnFindUnpairedDevices"
-        android:layout_marginTop="87dp"
-        android:text="Start Connection" />
+        android:layout_marginTop="8dp"
+        android:text="Start Connection"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnONOFF" />
 
 
     <Button
-        android:id="@+id/btnSend"
-        android:layout_width="wrap_content"
+        android:id="@+id/btnStartManualDrive"
+        android:layout_width="344dp"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/btnONOFF"
-        android:layout_marginLeft="13dp"
-        android:layout_marginTop="77dp"
-        android:layout_toRightOf="@+id/editText"
-        android:text="SEND" />
+        android:layout_marginTop="16dp"
+        android:text="START MANUAL DRIVE"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnStartConnection" />
+
+    <Button
+        android:id="@+id/btnStartAutomaticDrive"
+        android:layout_width="344dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="START AUTOMATIC DRIVE"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnStartManualDrive" />
+
+    <TextView
+        android:id="@+id/textViewInfo"
+        android:layout_width="344dp"
+        android:layout_height="160dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/btnONOFF"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>

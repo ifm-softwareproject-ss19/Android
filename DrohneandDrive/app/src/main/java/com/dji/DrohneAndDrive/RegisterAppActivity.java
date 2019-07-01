@@ -93,7 +93,7 @@ public class RegisterAppActivity extends Service {
         // Request for missing permissions
         if (missingPermission.isEmpty()) {
             startSDKRegistration();
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        } else  {
             showToast("Need to grant the permissions!");
 
         }
