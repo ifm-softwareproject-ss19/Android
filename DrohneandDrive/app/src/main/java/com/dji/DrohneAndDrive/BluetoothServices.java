@@ -18,8 +18,13 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /*
 Ein Service ,welcher im Hontergrund die Bluetooth Verbindung aufrechterhält
@@ -30,7 +35,8 @@ public class BluetoothServices extends Service {
     private Intent eventIntent;
 
     //Event Name für den BroadVCst Reciever
-    final String gps ="GPSdata";
+    final String gpsDrone ="GPSdata";
+    final String gpsCar ="GPSCar";
 
     private BluetoothAdapter mBluetoothAdapter;
     public static final String B_DEVICE = "MY DEVICE";
@@ -67,7 +73,7 @@ public class BluetoothServices extends Service {
                 Log.d("sendData",s);
 
 
-            } else if(action.equals(gps)) {
+            } else if(action.equals(gpsDrone)) {
                 sendData(Constants.getGpsData);
             }else{
 
@@ -76,9 +82,47 @@ public class BluetoothServices extends Service {
     };
     private void registerSteuerungReceiver() {
         IntentFilter filter = new IntentFilter();
-        filter.addAction(gps);
+        filter.addAction(gpsDrone);
         filter.addAction("car");
         registerReceiver(steuerungReceiver, filter);
+    }
+    //Wird nach dem einlesen des Datenstroms ausgeführt vom auto zu msmartphone
+    private void handleInputString(String input){
+        Intent intent = new Intent(gpsCar);
+
+
+        boolean gps = Pattern.matches("sendLoca.*",input);
+        if(gps){
+            String pattern = "[0-9]+\\.[0-9]+";
+
+            List<MatchResult> r = findMatches( pattern, input );
+            double lat = Double.parseDouble(r.get(0).group());
+            double longi =Double.parseDouble(r.get(1).group());
+            intent.putExtra("Latitude",lat);
+            intent.putExtra("Longitude",longi);
+            Log.d("pattern",lat+"    "+longi);
+
+            sendBroadcast(intent);
+
+        }
+        switch (input){
+            case "A":
+                break;
+            case "B":break;
+
+            default:break;
+        }
+    }
+
+    static List<MatchResult> findMatches( String pattern, CharSequence s )
+    {
+        List<MatchResult> results = new ArrayList<MatchResult>();
+
+        for ( Matcher m = Pattern.compile(pattern).matcher(s); m.find(); )
+
+            results.add( m.toMatchResult() );
+
+        return results;
     }
 
     @Override
@@ -280,29 +324,23 @@ public class BluetoothServices extends Service {
         public void run() {
             buffer = new byte[1024];
             int mByte;
-            try {
-                mByte = inS.read(buffer);
-                String incomingMessage = new String(buffer, 0, mByte);
-                Log.d("input", "InputStream: " + incomingMessage);
-                handleInputString(incomingMessage);
-            } catch (IOException e) {
-                e.printStackTrace();
+            boolean infinity = true;
+            while(infinity){
+                try {
+                    mByte = inS.read(buffer);
+                    String incomingMessage = new String(buffer, 0, mByte);
+                    Log.d("input", "InputStream: " + incomingMessage);
+                    handleInputString(incomingMessage);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             Log.d("service", "connected thread run method");
 
         }
         /*Je nach input sende eine Intent an die Brcastreciver
          */
-        private void handleInputString(String input){
 
-            switch (input){
-                case "A":
-                    break;
-                case "B":break;
-
-                default:break;
-            }
-        }
 
 
         public void write(byte[] buff) {

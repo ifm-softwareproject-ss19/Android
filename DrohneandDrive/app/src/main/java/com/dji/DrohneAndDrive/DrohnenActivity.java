@@ -119,8 +119,8 @@ public class DrohnenActivity extends AppCompatActivity {
                 );
                 //uptadeKoordinates();
             }
-            //snede gps Koordinaten ans Auto
-            //gpsIntent =new Intent(gps);
+            //snede gpsDrone Koordinaten ans Auto
+            //gpsIntent =new Intent(gpsDrone);
             //gpsIntent.putExtra("Longitude",longitude);
             //gpsIntent.putExtra("Latitude",latitude);
 
