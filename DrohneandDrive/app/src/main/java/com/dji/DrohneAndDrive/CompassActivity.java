@@ -39,7 +39,7 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     LocationManager lm;
 
     boolean firstrun = true;
-    boolean signalError= false;
+    boolean signalError = false;
 
     Location userLoc = new Location("service Provider");;
 
@@ -47,11 +47,19 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     double phoneLongitude;
     double phoneLatitude;
 
+    float updateLati = 0;
+    float updateLongi = 0;
+
     float newLati = 92; // impossible carGPS to check data
     float newLongi = 182;
     float heading = 0;
     float bearing = 0;
     long timer;
+
+    CustomCompassView compassView;
+    private SensorManager mSensorManager;
+    Sensor accelerometer;
+    Sensor magnetometer;
 
     public void testgpsData(){
         Intent test = new Intent();
@@ -163,14 +171,17 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
                 sendBroadcast(compassGps);
 
                 if(newLati < 92|| newLongi < 182){
-                    setLocs(newLati, newLongi);
+                    updateLati = newLati;
+                    updateLongi = newLongi;
 
-                }else{
+
+
+                } else if(firstrun){
                     signalError = true;
                 }
                 firstrun = false;
-
-
+                setLocs(updateLati, updateLongi);
+                System.out.println(signalError);
            }
 
             heading = (bearing - heading) * -1;
@@ -191,8 +202,8 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
 
             compassRotation = normalizeDegree(heading);
-           // System.out.println("Rotation:"+compassRotation);
-           // System.out.println("Orientation:"+compassOrientation);
+            System.out.println("Rotation:"+compassRotation);
+            System.out.println("Orientation:"+compassOrientation);
             if (compassRotation != null) {
                 if (compassRotation < 0) {
                     compassRotation = compassRotation + 360;
@@ -206,43 +217,49 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
 
             if(!signalError){
+
+                float rotation = compassRotation - (float)compassOrientation;
+                System.out.println("True Rotation:" + rotation);
+                canvas.rotate(rotation, centerWidth, centerHeight);
+                canvas.save();
+                signalError = false;
                 compassPaint.setColor(Color.RED);
                 compassPaint.setStyle(Paint.Style.STROKE);
                 compassPaint.setStrokeWidth(2);
+
                 Path arrow = new Path();
-                arrow.moveTo(centerWidth, centerHeight + 10);
-                arrow.lineTo(centerWidth + 30, centerHeight - 30);
-                arrow.lineTo(centerWidth - 30, centerHeight - 30);
+                arrow.moveTo(centerWidth, centerHeight - 320);
+                arrow.lineTo(centerWidth + 150, centerHeight);
+                arrow.lineTo(centerWidth - 150, centerHeight);
                 arrow.close();
 
                 canvas.drawPath(arrow, compassPaint);
-                canvas.drawText("Car", centerWidth, centerHeight - 40, compassPaint);
-                float rotation = compassRotation - (float)compassOrientation;
-                canvas.rotate(rotation, centerWidth, centerHeight);
+                compassPaint.setTextSize(110);
+                canvas.drawText("Car", centerWidth - 75, centerHeight + 110, compassPaint);
+
+
+                canvas.restore();
             }else{
 
 
                 compassPaint.setColor(Color.RED);
-                compassPaint.setStrokeWidth(5);
-                canvas.drawText("No Signal", centerWidth, centerHeight - 40, compassPaint);
+                compassPaint.setStrokeWidth(2);
+                compassPaint.setTextSize(30);
+                canvas.drawText("No Signal", centerWidth, centerHeight ,compassPaint);
             }
-            signalError = false;
 
         }
 
 
     }
 
-    CustomCompassView compassView;
-    private SensorManager mSensorManager;
-    Sensor accelerometer;
-    Sensor magnetometer;
+
 
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         registerCompassReceiver();
-        //testgpsData(); GPSTEST
+        testgpsData(); // GPSTEST
         timer = clock.elapsedRealtime(); // maybe better solution?
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
