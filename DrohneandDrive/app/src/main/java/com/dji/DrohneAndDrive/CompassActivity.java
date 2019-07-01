@@ -34,6 +34,7 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
     boolean firstRun = true;
     boolean signalError = false;
+    boolean tester = true;
 
     final String requestGpsCar = "requestGPSCar";
     final String gpsCar= "GPSCar";
@@ -44,11 +45,11 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     double phoneLongitude;
     double phoneLatitude;
 
-    float updateLati = 0;
-    float updateLongi = 0;
+    double updateLati = 0;
+    double updateLongi = 0;
 
-    float newLati = 92; // impossible carGPS to check data
-    float newLongi = 182;
+    double newLati = 92; // impossible carGPS to check data
+    double newLongi = 182;
     float heading = 0;
     float bearing = 0;
     long timer;
@@ -57,16 +58,16 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     private SensorManager mSensorManager;
     Sensor accelerometer;
     Sensor magnetometer;
-/*
-     a method to test GPSDAta
+
+  //   a method to test GPSDAta
     public void testgpsData(){
         Intent test = new Intent();
-        test.setAction("compassGpsData");
-        test.putExtra("compassLatitude",11.f);
-        test.putExtra("compassLongitude",11.f);
+        test.setAction("GPSCar");
+        test.putExtra("compassLatitude", 52.06526171883914);
+        test.putExtra("compassLongitude",9.109505649501275);
         sendBroadcast(test);
     }
-*/
+
     protected BroadcastReceiver compassReceiver = new BroadcastReceiver() {
 
         @Override
@@ -77,11 +78,11 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
             if (action.equals(gpsCar)) {
 
 
-                newLati = intent.getFloatExtra("compassLatitude",92);
+                newLati = intent.getDoubleExtra("compassLatitude",92);
                 System.out.println("latitude: " + newLati);
 
-                newLongi = intent.getFloatExtra("compassLongitude",182);
-                System.out.println("latitude: " + newLongi);
+                newLongi = intent.getDoubleExtra("compassLongitude",182);
+                System.out.println("longitude " + newLongi);
             }
 
         }
@@ -97,11 +98,14 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
     final LocationListener locationListener = new LocationListener() {
         public void onLocationChanged(Location location) {
-            if(location != null) {
+
 
                 phoneLongitude = location.getLongitude();
                 phoneLatitude = location.getLatitude();
-            }
+                if(tester){
+                   // testgpsData();
+                    tester = false;
+                }
         }
 
         @Override
@@ -120,7 +124,7 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         }
     };
 
-    public void setLocs(float lati, float longi) {
+    public void setLocs(double lati, double longi) {
 
         carLoc.setLongitude(longi);
         carLoc.setLatitude(lati);
@@ -171,14 +175,14 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
                     updateLati = newLati;
                     updateLongi = newLongi;
 
-
+                    signalError = false;
 
                 } else if(firstRun){
                     signalError = true;
                 }
                 firstRun = false;
                 setLocs(updateLati, updateLongi);
-                System.out.println(signalError);
+
            }
 
             heading = (bearing - heading) * -1;
@@ -199,8 +203,8 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
 
             compassRotation = normalizeDegree(heading);
-            System.out.println("Rotation:"+compassRotation);
-            System.out.println("Orientation:"+compassOrientation);
+            //System.out.println("Rotation:"+compassRotation);
+            //System.out.println("Orientation:"+compassOrientation);
             if (compassRotation != null) {
                 if (compassRotation < 0) {
                     compassRotation = compassRotation + 360;
@@ -216,7 +220,7 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
             if(!signalError){
 
                 float rotation = compassRotation - (float)compassOrientation;
-                System.out.println("True Rotation:" + rotation);
+              //  System.out.println("True Rotation:" + rotation);
                 canvas.rotate(rotation, centerWidth, centerHeight);
                 canvas.save();
                 signalError = false;
@@ -256,25 +260,16 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
         super.onCreate(savedInstanceState);
         registerCompassReceiver();
-        //testgpsData(); // GPSTEST
+
         timer = SystemClock.elapsedRealtime();
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 125);
             return;
         }
+       // testgpsData(); // GPSTEST
+        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 1, locationListener);
 
-        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 125);
-            return;
-        }
-
-        if(userLoc != null){
-            phoneLongitude = userLoc.getLongitude();
-            phoneLatitude = userLoc.getLatitude();
-        }
 
 
 
