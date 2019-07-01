@@ -120,12 +120,12 @@ public class DrohnenActivity extends AppCompatActivity {
                 //uptadeKoordinates();
             }
             //snede gps Koordinaten ans Auto
-            gpsIntent =new Intent(gps);
-            gpsIntent.putExtra("Longitude",longitude);
-            gpsIntent.putExtra("Latitude",latitude);
+            //gpsIntent =new Intent(gps);
+            //gpsIntent.putExtra("Longitude",longitude);
+            //gpsIntent.putExtra("Latitude",latitude);
 
 
-            sendBroadcast(gpsIntent);
+            //sendBroadcast(gpsIntent);
         }
     }
     class SendCarDataTask extends TimerTask {
@@ -176,6 +176,12 @@ public class DrohnenActivity extends AppCompatActivity {
                     latitude = djiFlightControllerCurrentState.getAircraftLocation().getLatitude();
                     longitude = djiFlightControllerCurrentState.getAircraftLocation().getLongitude();
                     atitude = djiFlightControllerCurrentState.getAircraftLocation().getAltitude();
+                    gpsIntent =new Intent(gps);
+                    gpsIntent.putExtra("Longitude",longitude);
+                    gpsIntent.putExtra("Latitude",latitude);
+
+
+                    sendBroadcast(gpsIntent);
                     updateDroneLocation();
                 }
             });
