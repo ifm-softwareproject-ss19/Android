@@ -34,5 +34,8 @@ public class Constants {
 
     public static final String txtInfoActionfilter ="refreshInfo";
 
+    public static final String carLatitude ="carLatitude";
+    public static final String carLongitude ="carLongigtude";
+
 }
 
