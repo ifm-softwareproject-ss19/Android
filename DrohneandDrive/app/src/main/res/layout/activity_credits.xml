@@ -6,4 +6,17 @@
     android:layout_height="match_parent"
     tools:context=".CreditsActivity">
 
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="344dp"
+        android:layout_height="211dp"
+        android:layout_marginTop="52dp"
+        android:text="Drohne and Drive  Version 1.0\n\n
+    Projektleiter: Alexander Heinisch\n
+    Entwickler:\n
+    Kevin Gerzen, Jakob Tissen\n Nick Friedrich ,André Grellmann"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </android.support.constraint.ConstraintLayout>

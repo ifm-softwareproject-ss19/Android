@@ -62,9 +62,9 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
   //   a method to test GPSDAta
     public void testgpsData(){
         Intent test = new Intent();
-        test.setAction("GPSCar");
-        test.putExtra("compassLatitude", 52.06526171883914);
-        test.putExtra("compassLongitude",9.109505649501275);
+        test.setAction(gpsCar);
+        test.putExtra(Constants.carLatitude, 52.06526171883914);
+        test.putExtra(Constants.carLongitude,9.109505649501275);
         sendBroadcast(test);
     }
 
@@ -76,12 +76,10 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
             Log.d("action", action);
 
             if (action.equals(gpsCar)) {
-
-
-                newLati = intent.getDoubleExtra("compassLatitude",92);
+                newLati = intent.getDoubleExtra(Constants.carLatitude,91);
                 System.out.println("latitude: " + newLati);
 
-                newLongi = intent.getDoubleExtra("compassLongitude",182);
+                newLongi = intent.getDoubleExtra(Constants.carLongitude,181);
                 System.out.println("longitude " + newLongi);
             }
 
@@ -99,11 +97,10 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     final LocationListener locationListener = new LocationListener() {
         public void onLocationChanged(Location location) {
 
-
                 phoneLongitude = location.getLongitude();
                 phoneLatitude = location.getLatitude();
                 if(tester){
-                   // testgpsData();
+                    testgpsData();
                     tester = false;
                 }
         }
@@ -135,7 +132,6 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         bearing = phoneLoc.bearingTo(carLoc);
 
 
-
     }
 
 
@@ -161,6 +157,7 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
 
         protected void onDraw(Canvas canvas) {
+            Log.d("Compass",newLati+"   "+newLongi+" phone:  "+phoneLatitude+"    "+phoneLatitude);
 
             timer = SystemClock.elapsedRealtime();
 
@@ -321,10 +318,6 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
                     Double.valueOf(userLoc.getAltitude()).floatValue(),
                     System.currentTimeMillis());
             heading = geoField.getDeclination();
-
-
-
-
 
             compassView.invalidate();
         }

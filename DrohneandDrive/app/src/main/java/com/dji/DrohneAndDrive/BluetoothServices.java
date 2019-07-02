@@ -105,8 +105,8 @@ public class BluetoothServices extends Service {
             List<MatchResult> r = findMatches( pattern, input );
             double lat = Double.parseDouble(r.get(0).group());
             double longi =Double.parseDouble(r.get(1).group());
-            intent.putExtra("Latitude",lat);
-            intent.putExtra("Longitude",longi);
+            intent.putExtra(Constants.carLatitude,lat);
+            intent.putExtra(Constants.carLongitude,longi);
             Log.d("pattern",lat+"    "+longi);
 
             sendBroadcast(intent);
