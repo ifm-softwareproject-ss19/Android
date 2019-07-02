@@ -232,10 +232,15 @@ public class DrohnenActivity extends AppCompatActivity {
                     eventIntent=new Intent("car");
                     eventIntent.putExtra("Direction",Constants.SteerFORWARD);
                     eventIntent.putExtra("Steering",Constants.DriveSTOP);
+                    sendBroadcast(new Intent("enable"));
 
                 }else{
                     switchJoystick.setText("Drohne");
                     stickJoystickToDrone();
+
+                    eventIntent=null;
+                    sendBroadcast(new Intent("disable"));
+                    mSendCarDataTimer.cancel();
                 }
             }
         });

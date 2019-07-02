@@ -22,11 +22,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
-import java.util.regex.MatchResult;
-
-import static com.dji.DrohneAndDrive.BluetoothServices.findMatches;
 
 
 public class AutoSteuerungActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
@@ -41,6 +37,7 @@ public class AutoSteuerungActivity extends AppCompatActivity implements AdapterV
     String latCar=""; String longiCar="";
     private double dlatDrohne=40; private double dlongDrohne=23;
     private final String genauigkeit ="%.6f";//Nachkommastelle
+    private String statusCar="Car status:";
 
     private static final String TAG = "AutosteuerungActivity";
 
@@ -51,7 +48,7 @@ public class AutoSteuerungActivity extends AppCompatActivity implements AdapterV
 
     Button btnONOFF;
     Button btnStartConnection;
-    Button btnStartManualDrive;
+    Button btnStopDrive;
     Button btnStartAutomaticDrive;
     TextView textViewInfo;
 
@@ -90,7 +87,7 @@ public class AutoSteuerungActivity extends AppCompatActivity implements AdapterV
         mBTDevices = new ArrayList<>();
 
         btnStartConnection = (Button) findViewById(R.id.btnStartConnection);
-        btnStartManualDrive = (Button) findViewById(R.id.btnStartManualDrive);
+        btnStopDrive = (Button) findViewById(R.id.btnStopDrive);
         btnStartAutomaticDrive = (Button) findViewById(R.id.btnStartAutomaticDrive);
         textViewInfo = (TextView) findViewById(R.id.textViewInfo);
         SharedPreferences prefs = getApplicationContext().getSharedPreferences("data",MODE_PRIVATE);
@@ -109,6 +106,10 @@ public class AutoSteuerungActivity extends AppCompatActivity implements AdapterV
         filterTxtView.addAction(gpsDrone);
         filterTxtView.addAction(gpsCar);
         filterTxtView.addAction(requestGpsCar);
+        filterTxtView.addAction("Status");
+        filterTxtView.addAction(Constants.carIsConnected);
+        filterTxtView.addAction(Constants.carIsNotConnected);
+
         registerReceiver(BroadcastReceiverTextViewInfo, filterTxtView);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -127,20 +128,23 @@ public class AutoSteuerungActivity extends AppCompatActivity implements AdapterV
                 if (bluetoothState.equals("ON") && carStateConnection.equals(Constants.carIsNotConnected)) {
                     startConnection();
                     setTextViewInfo();
+
                 } else {
                     Log.d(TAG, "bluetooth state = " + bluetoothState + "  carStateConnection= " + carStateConnection);
                 }
             }
         });
 
-        btnStartManualDrive.setOnClickListener(new View.OnClickListener() {
+        btnStopDrive.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 if(!carStateDriveModus.equals(Constants.carstateManual)&&carStateConnection.equals(Constants.carIsConnected)){
-                    mService.sendData(Constants.startManualDrive);
-                    carStateDriveModus=Constants.carstateManual;
+                    mService.sendData(Constants.emergencyStop);
+                   // mService.sendData("startGpsData(2)");
+                    carStateDriveModus=Constants.carstateNone;
                     setTextViewInfo();
+
                 }
 
             }
@@ -151,14 +155,13 @@ public class AutoSteuerungActivity extends AppCompatActivity implements AdapterV
             public void onClick(View view) {
                 if(!carStateDriveModus.equals(Constants.carstateAutomatic)&&carStateConnection.equals(Constants.carIsConnected)){
 
-                    //mService.sendData("automaticDrive("+dlatDrohne+","+dlongDrohne+")");
-
-                    mService.sendData("getGpsData()");
-                    //carStateDriveModus=Constants.carstateAutomatic;
+                    mService.sendData("automaticDrive("+dlatDrohne+","+dlongDrohne+")");
+                    sendBroadcast(new Intent(requestGpsCar));
+                    //mService.sendData("getGpsData()");
+                    carStateDriveModus=Constants.carstateAutomatic;
 
                     setTextViewInfo();
                 }
-
             }
         });
 
@@ -172,8 +175,9 @@ public class AutoSteuerungActivity extends AppCompatActivity implements AdapterV
         String driveModus ="Drive-Modus:"+ carStateDriveModus+n;
         String drohne = "Drohne GPS: Lati: " + latDrohne+ "  Longi: "+longiDrohne+n;
         String car = "Car GPS: Lati: " + latCar+ "  Longi: "+longiCar+n;
+        String carStatus = statusCar+n;
 
-        value = header+bluetooth+connection+driveModus+drohne+ car;
+        value = header+bluetooth+connection+driveModus+carStatus+drohne+ car ;
         textViewInfo.setText(value);
         SharedPreferences prefs = getSharedPreferences("data", MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
@@ -191,7 +195,6 @@ public class AutoSteuerungActivity extends AppCompatActivity implements AdapterV
         intent.putExtra("bluetooth_device", Constants.mac_Car); // Mac einfuegen
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
         startService(intent);
-        carStateConnection = Constants.carIsConnected;
     }
 
     /**
@@ -386,15 +389,24 @@ public class AutoSteuerungActivity extends AppCompatActivity implements AdapterV
                 latDrohne  = String.format(genauigkeit, dlatDrohne);
                 setTextViewInfo();
             }else if(action.equals(gpsCar)) {
-                cargpsinfo =intent.getStringExtra("gps");
+
                 double lo = intent.getDoubleExtra("Longitude", 6.6);
                 double la = intent.getDoubleExtra("Latitude", 0.0);
                 longiCar = String.format(genauigkeit, lo);
                 latCar = String.format(genauigkeit, la);
+                Log.d("gpscarinput", longiCar+" "   +latCar);
                 setTextViewInfo();
 
             }else if(action.equals(requestGpsCar)) {
-                mService.sendData("getGpsData()");
+                mService.sendData("startGpsData(2)");
+            }else if(action.equals("Status")) {
+                statusCar=intent.getStringExtra("Status");
+            }else if(action.equals(Constants.carIsConnected)) {
+                carStateConnection=Constants.carIsConnected;
+                setTextViewInfo();
+            }else if(action.equals(Constants.carIsNotConnected)) {
+                carStateConnection=Constants.carIsNotConnected;
+                setTextViewInfo();
             }
         }
     };

@@ -36,7 +36,7 @@ public class BluetoothServices extends Service {
 
     //Event Name für den BroadVCst Reciever
     final String gpsDrone ="GPSdata";
-    final String gpsCar ="GPSCar";
+    final String gpsCar ="GPSdataCar";
 
     private BluetoothAdapter mBluetoothAdapter;
     public static final String B_DEVICE = "MY DEVICE";
@@ -75,8 +75,11 @@ public class BluetoothServices extends Service {
 
             } else if(action.equals(gpsDrone)) {
                 sendData(Constants.getGpsData);
-            }else{
+            }else if(action.equals("enable")){
+                sendData(Constants.startManualDrive);
 
+            }else if(action.equals("disable")){
+                sendData(Constants.stopManualDrive);
             }
         }
     };
@@ -84,14 +87,18 @@ public class BluetoothServices extends Service {
         IntentFilter filter = new IntentFilter();
         filter.addAction(gpsDrone);
         filter.addAction("car");
+        filter.addAction("enable");
+        filter.addAction("disable");
         registerReceiver(steuerungReceiver, filter);
     }
     //Wird nach dem einlesen des Datenstroms ausgeführt vom auto zu msmartphone
     private void handleInputString(String input){
         Intent intent = new Intent(gpsCar);
+        Intent statusIntent = new Intent("Status");
 
 
         boolean gps = Pattern.matches("sendLoca.*",input);
+        boolean status = Pattern.matches("Status.*",input);
         if(gps){
             String pattern = "[0-9]+\\.[0-9]+";
 
@@ -104,6 +111,10 @@ public class BluetoothServices extends Service {
 
             sendBroadcast(intent);
 
+        }
+        else if(status){
+            statusIntent.putExtra("Status",input);
+            sendBroadcast(statusIntent);
         }
         switch (input){
             case "A":
@@ -220,6 +231,7 @@ public class BluetoothServices extends Service {
         }
     }
 
+
     @Override
     public boolean stopService(Intent name) {
         setState(STATE_NONE);
@@ -247,8 +259,10 @@ public class BluetoothServices extends Service {
             BluetoothSocket socket = null;
             try {
                 socket = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(B_UUID));
+                sendBroadcast(new Intent(Constants.carIsConnected));
             } catch (IOException e) {
-                e.printStackTrace();
+                toast("Connection failed");
+                sendBroadcast(new Intent(Constants.carIsNotConnected));
             }
             mSocket = socket;
 

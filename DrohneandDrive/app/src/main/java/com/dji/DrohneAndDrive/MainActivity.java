@@ -35,7 +35,10 @@ public class MainActivity extends AppCompatActivity {
     };
     private List<String> missingPermission = new ArrayList<>();
 
-
+    public void buttonPressed_Credits(View view){
+        Intent intent = new Intent(this, CreditsActivity.class);
+        startActivity(intent);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
