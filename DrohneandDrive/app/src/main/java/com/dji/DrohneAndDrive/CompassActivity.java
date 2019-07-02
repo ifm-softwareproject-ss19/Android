@@ -34,39 +34,28 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
     boolean firstRun = true;
     boolean signalError = false;
-    boolean tester = true;
 
     final String requestGpsCar = "requestGPSCar";
     final String gpsCar= "GPSCar";
 
-    Location userLoc = new Location("service Provider");
-
+    Location phoneLoc = new Location("service Provider");
     Location carLoc = new Location("service Provider");
+
     double phoneLongitude;
     double phoneLatitude;
-
     double updateLati = 0;
     double updateLongi = 0;
 
-    double newLati = 92; // impossible carGPS to check data
+    double newLati = 92; // impossible carGPS to check if Data was send
     double newLongi = 182;
     float heading = 0;
     float bearing = 0;
-    long timer;
+    long timer;     //
 
     CustomCompassView compassView;
     private SensorManager mSensorManager;
     Sensor accelerometer;
     Sensor magnetometer;
-
-  //   a method to test GPSDAta
-    public void testgpsData(){
-        Intent test = new Intent();
-        test.setAction(gpsCar);
-        test.putExtra(Constants.carLatitude, 52.06526171883914);
-        test.putExtra(Constants.carLongitude,9.109505649501275);
-        sendBroadcast(test);
-    }
 
     protected BroadcastReceiver compassReceiver = new BroadcastReceiver() {
 
@@ -87,6 +76,7 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     };
 
     private void registerCompassReceiver() {
+        //register the Receiver
         IntentFilter filter = new IntentFilter();
         filter.addAction(gpsCar);
         registerReceiver(compassReceiver, filter);
@@ -96,36 +86,33 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
     final LocationListener locationListener = new LocationListener() {
         public void onLocationChanged(Location location) {
-
-                phoneLongitude = location.getLongitude();
-                phoneLatitude = location.getLatitude();
-                if(tester){
-                   //testgpsData();
-                   tester = false;
-                }
+            //is called when the Phone Location is changed
+            phoneLongitude = location.getLongitude();
+            phoneLatitude = location.getLatitude();
+            phoneLoc.setLongitude(phoneLongitude);
+            phoneLoc.setLatitude(phoneLatitude);
         }
 
         @Override
         public void onStatusChanged(String s, int i, Bundle bundle) {
-
+            // not used
         }
 
         @Override
         public void onProviderEnabled(String s) {
-
+            //not used
         }
 
         @Override
         public void onProviderDisabled(String s) {
-
+            //not used
         }
     };
 
     public void setLocs(double lati, double longi) {
-
+        //setting location data and determining bearing
         carLoc.setLongitude(longi);
         carLoc.setLatitude(lati);
-        Location phoneLoc = new Location("service Provider");
 
         phoneLoc.setLongitude(phoneLongitude);
         phoneLoc.setLatitude(phoneLatitude);
@@ -161,18 +148,17 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
             timer = SystemClock.elapsedRealtime();
 
-        //GPSTEST    System.out.println("Latitude"+newLati);
-
             if (timer + 0.5 < SystemClock.elapsedRealtime()|| firstRun) {
                 Intent compassGps = new Intent();
                 compassGps.setAction(requestGpsCar);
-                sendBroadcast(compassGps);
+                sendBroadcast(compassGps); // requesting GpsData
 
-                if(newLati < 92|| newLongi < 182){
-                    updateLati = newLati;
+                if(newLati < 92|| newLongi < 182){ //only updating Data when new Location Data was send
+
+                    //updating last Car Location Data
                     updateLongi = newLongi;
-
-                    signalError = false;
+                    updateLati = newLati;
+                    signalError = false; // after a getting a signal remove "no Signal"
 
                 } else if(firstRun){
                     signalError = true;
@@ -193,15 +179,12 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
             int centerHeight = height / 2;
 
 
-
+            //correting Bearing Heading and CompassRoatation Degrees
             if (bearing < 0) {
                 bearing = bearing + 360;
             }
 
-
             compassRotation = normalizeDegree(heading);
-            //System.out.println("Rotation:"+compassRotation);
-            //System.out.println("Orientation:"+compassOrientation);
             if (compassRotation != null) {
                 if (compassRotation < 0) {
                     compassRotation = compassRotation + 360;
@@ -216,8 +199,7 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
             if(!signalError){
 
-                float rotation = compassRotation - (float)compassOrientation;
-              //  System.out.println("True Rotation:" + rotation);
+                float rotation = compassRotation - (float)compassOrientation; // the final Rotation of the Drawing
                 canvas.rotate(rotation, centerWidth, centerHeight);
                 canvas.save();
                 signalError = false;
@@ -256,15 +238,14 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        registerCompassReceiver();
+        registerCompassReceiver(); // registering Receiver for Bluetooth CarGpsData
 
         timer = SystemClock.elapsedRealtime();
-        lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE); // asking for necessary Permissions
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 125);
             return;
         }
-       // testgpsData(); // GPSTEST
         lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 1, locationListener);
 
 
@@ -272,29 +253,31 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
         compassView = new CustomCompassView(this);
         setContentView(compassView);    // Register the sensor listeners
-        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE); // sensors to determine North
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
     }
 
     protected void onResume() {
-        super.onResume();
+        super.onResume();       //is called when Activity is Resumed
         mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
         mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
     }
 
     protected void onPause() {
-        super.onPause();
-        mSensorManager.unregisterListener(this);
+        super.onPause();        //is called when Activity is Paused
+        mSensorManager.unregisterListener(this); // unregister sensors when they're not used
     }
 
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {  }
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        //not used
+    }
 
     float[] mGravity;
     float[] mGeomagnetic;
 
     public void onSensorChanged(SensorEvent event) {
-
+        // is called when the sensor get new signals
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
             mGravity = event.values;
         if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
@@ -306,20 +289,18 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
             if (success) {
                 float[] orientation = new float[3];
                 SensorManager.getOrientation(R, orientation);
-               // System.out.println("orientationSensor:"+orientation[0]);
-                compassOrientation = Math.toDegrees(orientation[0]);
-              //  System.out.println("OrientationSensor:"+compassOrientation);
+                compassOrientation = Math.toDegrees(orientation[0]); //CompassOrientation is the Rotation of the phone
             }
         }
 
         
-            GeomagneticField geoField = new GeomagneticField(Double.valueOf(userLoc.getLatitude()).floatValue(), Double
-                    .valueOf(userLoc.getLongitude()).floatValue(),
-                    Double.valueOf(userLoc.getAltitude()).floatValue(),
+            GeomagneticField geoField = new GeomagneticField(Double.valueOf(phoneLoc.getLatitude()).floatValue(), Double
+                    .valueOf(phoneLoc.getLongitude()).floatValue(),
+                    Double.valueOf(phoneLoc.getAltitude()).floatValue(),
                     System.currentTimeMillis());
-            heading = geoField.getDeclination();
+            heading = geoField.getDeclination(); // getting the heading
 
-            compassView.invalidate();
+            compassView.invalidate(); // calls onDraw of compassView
         }
 
 
