@@ -54,6 +54,14 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, AutoSteuerungActivity.class);
         startActivity(intent);
     }
+    public void buttonPressed_Compass(View view){
+        Intent intent = new Intent(this, CompassActivity.class);
+        startActivity(intent);
+    }
+    public void buttonPressed_Credits(View view){
+        Intent intent = new Intent(this, CreditsActivity.class);
+        startActivity(intent);
+    }
     private void checkAndRequestPermissions() {
         // Check for permissions
         for (String eachPermission : REQUIRED_PERMISSION_LIST) {
