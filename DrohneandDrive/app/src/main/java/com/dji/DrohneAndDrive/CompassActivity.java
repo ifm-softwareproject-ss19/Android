@@ -103,7 +103,7 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
                 phoneLongitude = location.getLongitude();
                 phoneLatitude = location.getLatitude();
                 if(tester){
-                   // testgpsData();
+                   testgpsData();
                     tester = false;
                 }
         }
